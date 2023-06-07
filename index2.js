@@ -13,8 +13,6 @@ const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 const propGrid = [];
 let size = 10;
 let max = 10;
-let ENRandNum;
-let ENRandLett;
 let randLett;
 let randNumb;
 let playing = true;
@@ -48,6 +46,14 @@ function gameLoop() {
   plGameSet();
   console.log(propGrid);
   let start = rs.question("Press any key to start game");
+  
+  
+  
+  while (enShipCount > 0) {
+    vertOrNot();
+    selectId = "";
+  }
+  
   function randNum(max) {
     return Math.floor(Math.random() * Math.floor(max));
   }
@@ -57,30 +63,34 @@ function gameLoop() {
       let flop = randNum(max);
       if (flop > 5) {
         console.log("vertical");
-        randNumb = nums[randNum(max)];
-        for (let j = 0; j < ships[i].units; j++) {
-          randLett = letters[randNum(max - ships[i].units) + 1];
-          selectId = `${randLett}${randNumb}`;
-          console.log(selectId);
-          ChangeENBoard(i);
-        }
-      } else console.log("horizontal");
-      randLett = letters[randNum(max)];
-      for (let j = 0; j < ships[i].units; j++) {
-        randNumb = nums[randNum(max - ships[i].units) + 1];
-        selectId = `${randLett}${randNumb}`;
-        console.log(selectId);
-        ChangeENBoard(i);
+        vertical(i);
+      } else {
+        console.log("horizontal");
+        horizontal(i);
       }
       enShipCount--;
     }
   }
   
-  while (enShipCount > 0) {
-    vertOrNot();
-    ChangeENBoard();
-    selectId = "";
+  function horizontal(i) {
+    randLett = letters[randNum(max)];
+    for (let j = 0; j < ships[i].units; j++) {
+      randNumb = nums[randNum(max - ships[i].units) + 1];
+      selectId = `${randLett}${randNumb}`;
+      console.log(selectId);
+      ChangeENBoard(i); 
+    }
   }
+  function vertical(i) {
+    randNumb = nums[randNum(max)];
+    for (let j = 0; j < ships[i].units; j++) {
+      randLett = letters[randNum(max - ships[i].units) + 1];
+      selectId = `${randLett}${randNumb}`;
+      console.log(selectId);
+      ChangeENBoard(i);
+    }
+  }
+  
   function ChangeENBoard(i) {
     propGrid.map((obj) => {
       if (obj.id === selectId.toString() && obj.placed === Boolean(false)) {
