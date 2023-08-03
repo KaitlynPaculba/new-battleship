@@ -1,11 +1,7 @@
 var rs = require("readline-sync");
 
-const legend = [
-  { id: "blank", marks: "|_" },
-  { id: "ship", marks: "|#" },
-  { id: "hit", marks: "|X" },
-  { id: "miss", marks: "|O" },
-];
+
+let blank = `|_`; let ship = `|#`; let hit = `|X`; let miss = `|O`;
 enShipCount = 5;
 let enLives = 5;
 const letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
@@ -16,28 +12,21 @@ let max = 10;
 let randLett;
 let randNumb;
 let playing = true;
-let i;
-let shipId;
 const ships = [
-  { id: "ship-1", units: 2 },
-  { id: "ship-2", units: 3 },
-  { id: "ship-3", units: 3 },
-  { id: "ship-4", units: 4 },
-  { id: "ship-5", units: 5 },
+  { coords: [], id: "Patrol Boat", units: 2,  },
+  { coords: [], id: "Submarine", units: 3,  },
+  { coords: [], id: "Destroyer", units: 3, },
+  { coords: [], id: "Battleship", units: 4, },
+  { coords: [], id: "Carrier", units: 5, },
 ];
-
-// 1. Decide vertical or horizontal
-// 2. add length to the ship start;
-
+const sunkShips = [];
 function gameLoop() {
   function plGameSet() {
     for (let i = 1; i < size + 1; i++) {
       for (let j = 0; j < size; j++) {
         let newRow = {
           id: letters[i - 1] + nums[j],
-          mark: legend[0].marks,
-          placed: Boolean(false),
-          shipId: "",
+          mark: blank
         };
         propGrid.push(newRow);
       }
@@ -47,11 +36,9 @@ function gameLoop() {
   console.log(propGrid);
   let start = rs.question("Press any key to start game");
   
-  
-  
   while (enShipCount > 0) {
     vertOrNot();
-    selectId = "";
+    selectId = '';
   }
   
   function randNum(max) {
@@ -64,76 +51,79 @@ function gameLoop() {
       if (flop > 5) {
         console.log("vertical");
         vertical(i);
-      } else {
+     } else {
         console.log("horizontal");
         horizontal(i);
       }
       enShipCount--;
     }
   }
-  
+
   function horizontal(i) {
     randLett = letters[randNum(max)];
-    for (let j = 0; j < ships[i].units; j++) {
-      randNumb = nums[randNum(max - ships[i].units) + 1];
-      selectId = `${randLett}${randNumb}`;
-      console.log(selectId);
-      ChangeENBoard(i); 
-    }
-  }
-  function vertical(i) {
-    randNumb = nums[randNum(max)];
-    for (let j = 0; j < ships[i].units; j++) {
-      randLett = letters[randNum(max - ships[i].units) + 1];
-      selectId = `${randLett}${randNumb}`;
-      console.log(selectId);
-      ChangeENBoard(i);
+    randNumb = nums[randNum(max - ships[i].units)];
+    selectId = `${randLett}${randNumb}`;
+    console.log(selectId);
+    for (let k = 0; k < propGrid.length; k++) {
+      if (propGrid[k].id === selectId && propGrid[k].mark === blank) {
+        for (let j = 0; j < ships[i].units; j++) {
+          selectId = propGrid[k + j];
+          propGrid.map((obj) => {
+            if (obj.id === selectId.id && obj.mark === blank) {
+              obj.mark === ship;
+              console.log(obj);
+            }
+          })
+          ships[i].coords.push(selectId.id);
+          selectId = '';
+        }
+      }
     }
   }
   
-  function ChangeENBoard(i) {
-    propGrid.map((obj) => {
-      if (obj.id === selectId.toString() && obj.placed === Boolean(false)) {
-        obj.placed = Boolean(true);
-        obj.mark === legend[1].marks;
-        obj.shipId === ships[i].id;
+  function vertical(i) {
+    randNumb = nums[randNum(max)];
+    randLett = letters[randNum(max - ships[i].units)];
+    selectId = `${randLett}${randNumb}`;
+    console.log(selectId);
+    
+    for (let k = 0; k < propGrid.length; k++) {
+      if (propGrid[k].id === selectId && propGrid[k].mark === blank) {
+        for (let j = 0; j < ships[i].units; j++) {
+          if (j === 0) {
+            x = j;
+          } else { x = j * 10 };
+          selectId = propGrid[x + k];
+          propGrid.map((obj) => {
+            if (obj.id === selectId.id && obj.mark === blank) {
+              obj.mark === ship;
+              console.log(obj);
+            }
+          })
+          ships[i].coords.push(selectId.id);
+          selectId = '';
+        }
       }
-    });
+    }
   }
-
+  
+  
+  let slip = 0;
   while (enLives > 0) {
+    console.log(ships);
     function playerFunc() {
       let attackPrompt = rs.question("Enter a location to strike. ie A2 ");
-      propGrid.map((obj) => {
-        if (obj.id === attackPrompt.toUpperCase()) {
-          if (obj.mark === legend[2].marks) {
-            console.log(`Miss! You have already hit ${attackPrompt}`);
-          } else if (obj.mark === legend[3].marks) {
-            console.log(`Miss! You have already hit ${attackPrompt}`);
+      //for (let a = 0; a < ships.length; a++) {
+        ships.map((obj) => {
+        if (obj.coords.includes(attackPrompt.toUpperCase())) {
+          console.log('Hit!');
+          slip = 1;
+          } if (obj.coords !== attackPrompt.toUpperCase() && slip === 0) {
+            console.log('miss!')
           }
-        }
-        if (
-          obj.id === attackPrompt.toUpperCase() &&
-          obj.mark !== legend[2].marks &&
-          obj.placed === Boolean(true)
-        ) {
-          obj.mark = legend[2].marks;
-          if (enLives === 2) {
-            console.log("Hit! You have sunk a battleship. 1 Ship remaining");
-          } else {
-            console.log("Hit!");
-          }
-          enLives--;
-        }
-        if (
-          obj.id === attackPrompt.toUpperCase() &&
-          obj.mark === legend[0].marks &&
-          obj.placed === Boolean(false)
-        ) {
-          obj.mark = legend[3].marks;
-          console.log("Miss!");
-        }
-      });
+      })  
+      //}
+      
     }
     playerFunc();
   }
@@ -156,3 +146,4 @@ function gameLoop() {
       gameLoop();
     }
   }
+

@@ -1,11 +1,9 @@
 var rs = require('readline-sync');
 
-const legend = [
-  {id: 'blank', marks: '|_' },
-  {id: 'ship', marks: '|#'},
-  {id: 'hit', marks: '|X' },
-  {id: 'miss', marks: '|O' },
-];
+let blank = '|_';
+let ship = '|#';
+let hit = '|X';
+let miss = '|O';
 enShipCount = 2;
 enLives = 2;
 const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
@@ -24,7 +22,7 @@ function gameLoop() {
   function plGameSet() {
     for (let i = 1; i < size + 1; i++) {
       for (let j = 0; j < size; j++) {
-        let newRow = ({ id: letters[i - 1] + nums[j], mark: legend[0].marks, placed: Boolean(false) });
+        let newRow = ({ id: letters[i - 1] + nums[j], mark: blank, placed: Boolean(false) });
         propGrid.push(newRow);
       }; 
     };
@@ -46,7 +44,7 @@ function gameLoop() {
       propGrid.map((obj) => {
       if (obj.id === selectId.toString() && obj.placed === Boolean(false)) {
         obj.placed = Boolean(true);
-        obj.mark === legend[1].marks;
+        obj.mark === ship;
       }}) 
     };
   ChangeENBoard();
@@ -59,22 +57,22 @@ function gameLoop() {
     let attackPrompt = rs.question('Enter a location to strike. ie A2 ');
       propGrid.map((obj) => {
         if (obj.id === attackPrompt.toUpperCase()) {
-          if (obj.mark === legend[2].marks) {
+          if (obj.mark === hit) {
             console.log(`Miss! You have already hit ${attackPrompt}`);  
           } else
-            if (obj.mark === legend[3].marks) {
+            if (obj.mark === miss) {
               console.log(`Miss! You have already hit ${attackPrompt}`);
             };
         }   
-    if (obj.id === attackPrompt.toUpperCase() && obj.mark !== legend[2].marks && obj.placed === Boolean(true)) {
-      obj.mark = legend[2].marks;
+    if (obj.id === attackPrompt.toUpperCase() && obj.mark !== hit && obj.placed === Boolean(true)) {
+      obj.mark = hit;
       if (enLives > 1) {
        console.log('Hit! You have sunk a battleship. 1 Ship remaining'); 
       }
       enLives--;
     }
-      if (obj.id === attackPrompt.toUpperCase() && obj.mark === legend[0].marks && obj.placed === Boolean(false)) {
-      obj.mark = legend[3].marks;
+      if (obj.id === attackPrompt.toUpperCase() && obj.mark === blank && obj.placed === Boolean(false)) {
+      obj.mark = miss;
         console.log('Miss!');
       }     
   }); 
