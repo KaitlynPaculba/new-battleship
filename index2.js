@@ -1,9 +1,7 @@
 var rs = require("readline-sync");
 
-
-let blank = `|_`; let ship = `|#`; let hit = `|X`; let miss = `|O`;
-enShipCount = 5;
-let enLives = 5;
+//let blank = `|_`; let ship = `|#`; let hit = `|X`; let miss = `|O`;
+let shipCount = 5;
 const letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
 const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 const propGrid = [];
@@ -12,34 +10,35 @@ let max = 10;
 let randLett;
 let randNumb;
 let playing = true;
-const ships = [
-  { coords: [], id: "Patrol Boat", units: 2,  },
-  { coords: [], id: "Submarine", units: 3,  },
-  { coords: [], id: "Destroyer", units: 3, },
-  { coords: [], id: "Battleship", units: 4, },
-  { coords: [], id: "Carrier", units: 5, },
-];
-const sunkShips = [];
+let allCheck = true;
+let allCoords = [];
+let usedCoords = [];
+const shpId = ['Patrol Boat', 'Submarine', 'Destroyer', 'Battleship', 'Carrier'];
+const shpUn = [2, 3, 3, 4, 5];
+const ships = [];
+let totalUnits = 17;
+const guessCoords = [];
+const hitCoords = []
 function gameLoop() {
   function plGameSet() {
-    for (let i = 1; i < size + 1; i++) {
+    for (let i = 0; i < size; i++) {
       for (let j = 0; j < size; j++) {
-        let newRow = {
-          id: letters[i - 1] + nums[j],
-          mark: blank
-        };
-        propGrid.push(newRow);
+        id = letters[i] + nums[j];
+          propGrid.push(id);
       }
     }
   }
   plGameSet();
+
+  function shipYard() {
+    for (let a = 0; a < shipCount; a++) {
+      let newShip = { coords: [], id: shpId[a], units: shpUn[a] };
+      ships.push(newShip);
+    }
+  }
+  shipYard();
   console.log(propGrid);
   let start = rs.question("Press any key to start game");
-  
-  while (enShipCount > 0) {
-    vertOrNot();
-    selectId = '';
-  }
   
   function randNum(max) {
     return Math.floor(Math.random() * Math.floor(max));
@@ -49,13 +48,10 @@ function gameLoop() {
     for (let i = 0; i < ships.length; i++) {
       let flop = randNum(max);
       if (flop > 5) {
-        console.log("vertical");
         vertical(i);
-     } else {
-        console.log("horizontal");
+      } else {
         horizontal(i);
       }
-      enShipCount--;
     }
   }
 
@@ -63,75 +59,108 @@ function gameLoop() {
     randLett = letters[randNum(max)];
     randNumb = nums[randNum(max - ships[i].units)];
     selectId = `${randLett}${randNumb}`;
-    console.log(selectId);
     for (let k = 0; k < propGrid.length; k++) {
-      if (propGrid[k].id === selectId && propGrid[k].mark === blank) {
+      if (propGrid[k] === selectId) {
         for (let j = 0; j < ships[i].units; j++) {
           selectId = propGrid[k + j];
-          propGrid.map((obj) => {
-            if (obj.id === selectId.id && obj.mark === blank) {
-              obj.mark === ship;
-              console.log(obj);
-            }
-          })
-          ships[i].coords.push(selectId.id);
+          allCoords.push(selectId);
           selectId = '';
         }
       }
     }
   }
-  
+
   function vertical(i) {
     randNumb = nums[randNum(max)];
     randLett = letters[randNum(max - ships[i].units)];
     selectId = `${randLett}${randNumb}`;
-    console.log(selectId);
-    
     for (let k = 0; k < propGrid.length; k++) {
-      if (propGrid[k].id === selectId && propGrid[k].mark === blank) {
+      if (propGrid[k] === selectId) {
         for (let j = 0; j < ships[i].units; j++) {
           if (j === 0) {
             x = j;
           } else { x = j * 10 };
           selectId = propGrid[x + k];
-          propGrid.map((obj) => {
-            if (obj.id === selectId.id && obj.mark === blank) {
-              obj.mark === ship;
-              console.log(obj);
-            }
-          })
-          ships[i].coords.push(selectId.id);
+          allCoords.push(selectId);
           selectId = '';
         }
       }
     }
   }
-  
-  
-  let slip = 0;
-  while (enLives > 0) {
-    console.log(ships);
-    function playerFunc() {
-      let attackPrompt = rs.question("Enter a location to strike. ie A2 ");
-      //for (let a = 0; a < ships.length; a++) {
-        ships.map((obj) => {
-        if (obj.coords.includes(attackPrompt.toUpperCase())) {
-          console.log('Hit!');
-          slip = 1;
-          } if (obj.coords !== attackPrompt.toUpperCase() && slip === 0) {
-            console.log('miss!')
-          }
-      })  
-      //}
-      
-    }
-    playerFunc();
+  function setGameComp() {
+    vertOrNot()
+    checkCoords()
   }
+  setGameComp()
+  
+  function checkCoords() {
+    count = 0;
+    for (let a = 0; a < allCoords.length; a++) {
+      for (let b = 0; b < allCoords.length; b++) {
+        if (allCoords[a] === allCoords[b]) {
+          count += 1;
+          console.log(allCoords);
+          
+          console.log(`count ${count}`);
+          
+        }  
+      } 
+    }
+    if (count > 17) {
+      allCheck === false;
+      allCoords.length = 0;
+      setGameComp();
+      } else
+    if (count === 17) {
+      totalUnits = 0;
+      console.log('allCoords');
+      console.log(allCoords)
+      for (let d = 0; d < ships.length; d++) {
+        for (let c = 0; c < ships[d].units; c++) {
+          ships[d].coords.push(allCoords[totalUnits]);
+          usedCoords.push(allCoords[totalUnits]);
+          totalUnits++;
+        }
+      }
+    }
+  }
+
+  if (allCheck) {
+    while (shipCount > 0) {
+      console.log(ships);
+      function playerFunc() {
+        let attackPrompt = rs.question("Enter a location to strike. ie A2 ");
+          if (guessCoords.includes(attackPrompt.toUpperCase()) === false && allCoords.includes(attackPrompt.toUpperCase()) === false) {
+            console.log('Miss!');
+            guessCoords.push(attackPrompt.toUpperCase());
+          } if (guessCoords.includes(attackPrompt.toUpperCase()) && hitCoords.includes(attackPrompt.toUpperCase())) {
+            console.log(`${attackPrompt.toUpperCase()} has already been hit.`)
+          }
+          ships.forEach((shp) => {
+            if (shp.coords.includes(attackPrompt.toUpperCase()) && guessCoords.includes(attackPrompt.toUpperCase()) === false) {
+              console.log('Hit');
+              guessCoords.push(attackPrompt.toUpperCase());
+              hitCoords.push(attackPrompt.toUpperCase())
+              shp.units--
+              if (shp.coords.includes(attackPrompt.toUpperCase()) && shp.units === 0) {
+                console.log(`You have sunk a ship! ${shipCount - 1} ships remain.`);
+                guessCoords.push(attackPrompt.toUpperCase());
+                hitCoords.push(attackPrompt.toUpperCase())
+                shipCount--
+              }
+            }
+          });
+          
+        }
+      playerFunc()
+    }
+  }
+  
 }
   for (let i = 0; i < 1; i++) {
     gameLoop();
   }
-  while (playing) {
+  while (playing && shipCount === 0) {
     let playAgain = rs.keyInYN(
       "You have destroyed all battleships. Would you like to play again? "
     );
@@ -140,10 +169,16 @@ function gameLoop() {
       console.log("game ended");
     } else {
       playing = true;
-      enLives = 2;
-      enShipCount = 2;
+      shipCount = 5;
+      guessCoords.length = 0;
+      usedCoords.length = 0;
+      allCoords.length = 0;
       propGrid.length = 0;
+      ships.length = 0;
       gameLoop();
     }
   }
+
+
+
 
