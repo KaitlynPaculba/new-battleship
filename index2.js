@@ -99,10 +99,6 @@ function gameLoop() {
       for (let b = 0; b < allCoords.length; b++) {
         if (allCoords[a] === allCoords[b]) {
           count += 1;
-          console.log(allCoords);
-          
-          console.log(`count ${count}`);
-          
         }  
       } 
     }
@@ -113,8 +109,6 @@ function gameLoop() {
       } else
     if (count === 17) {
       totalUnits = 0;
-      console.log('allCoords');
-      console.log(allCoords)
       for (let d = 0; d < ships.length; d++) {
         for (let c = 0; c < ships[d].units; c++) {
           ships[d].coords.push(allCoords[totalUnits]);
